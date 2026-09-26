@@ -38,7 +38,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DPORTABLE=1 \
             ..
-          ninja emulator
+          ninja -v -k 0 emulator
 
       - name: Verify architecture
         run: |
