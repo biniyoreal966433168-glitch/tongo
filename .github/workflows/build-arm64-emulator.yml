@@ -1,5 +1,53 @@
+name: Build ARM64 TON Emulator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout TON
+        uses: actions/checkout@v4
+        with:
+          repository: ton-blockchain/ton
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            clang \
+            git \
+            pkg-config \
+            zlib1g-dev \
+            libssl-dev \
+            libsodium-dev \
+            libmicrohttpd-dev \
+            liblz4-dev
+
       - name: Build emulator
         run: |
-          mkdir build && cd build
-          cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPORTABLE=1 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+          mkdir build
+          cd build
+          cmake -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPORTABLE=1 \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            ..
           ninja -v emulator
+
+      - name: Verify architecture
+        run: |
+          file build/emulator/libemulator.so
+
+      - name: Upload ARM64 emulator
+        uses: actions/upload-artifact@v4
+        with:
+          name: libemulator-linux-arm64
+          path: build/emulator/libemulator.so
